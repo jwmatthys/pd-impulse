@@ -1,4 +1,4 @@
-#N canvas 340 501 402 206 10;
+#N canvas 340 501 465 283 10;
 #X text 60 13 ---impulse~---;
 #X text 61 35 non-bandlimited single-sample impulses;
 #X text 292 163 sIgpAck 0.04;
@@ -9,9 +9,14 @@
 #X obj 63 157 dac~;
 #X msg 183 123 \; pd dsp 1;
 #X msg 152 69 0;
-#X obj 62 105 impulse~ 20;
-#X connect 4 0 10 0;
+#X msg 150 185 bang;
+#X obj 144 220 print~;
+#X obj 62 105 impulse~ 1;
+#X connect 4 0 12 0;
 #X connect 6 0 7 0;
 #X connect 6 0 7 1;
-#X connect 9 0 10 1;
-#X connect 10 0 6 0;
+#X connect 9 0 10 0;
+#X connect 9 0 12 1;
+#X connect 10 0 11 0;
+#X connect 12 0 6 0;
+#X connect 12 0 11 0;
