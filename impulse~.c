@@ -48,7 +48,7 @@ static t_int *impulse_tilde_perform(t_int *w)
 		phase_step = f / x->x_sample_rate;
 		value = (x->x_phase > 1.f || x->x_phase <= 0) ? 1.f : 0.f;
 		if (x->x_phase > 1.f) x->x_phase -= 1.f;
-		if (x->x_phase < 0) x->x_phase += 1.f;
+		if (x->x_phase <= 0) x->x_phase += 1.f;
 		*out++ = value;
 		x->x_phase += phase_step;
     }
