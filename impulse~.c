@@ -22,6 +22,7 @@ typedef struct _impulse_tilde
 	t_sample x_phase;
 	t_sample x_sample_rate;
 	float x_f;
+	float x_last;
 } t_impulse_tilde;
 
 static void *impulse_tilde_new(t_floatarg f)
@@ -29,7 +30,8 @@ static void *impulse_tilde_new(t_floatarg f)
 	t_impulse_tilde *x = (t_impulse_tilde *)pd_new(impulse_tilde_class);
 	x->x_f = f;
 	x->x_phase = 0.f;
-	x->x_sample_rate = sys_getsr();//later put this in impulse_tilde_dsp???
+	x->x_last = 0.f;
+	x->x_sample_rate = sys_getsr();
 	outlet_new(&x->x_obj, gensym("signal"));
 	inlet_new(&x->x_obj, &x->x_obj.ob_pd, &s_float, gensym("ft1"));
 	return (x);
@@ -41,16 +43,29 @@ static t_int *impulse_tilde_perform(t_int *w)
     t_float *in = (t_float *)(w[2]);
     t_float *out = (t_float *)(w[3]);
     int n = (int)(w[4]);
-	float f, phase_step, value;
+	float f, phase_step;
+	float bang = 0;
     while (n--)
     {
     	f = *(in++);
 		phase_step = f / x->x_sample_rate;
-    value = (x->x_phase > 1.f || x->x_phase <= 0) ? 1.f : 0.f;
-    while (x->x_phase <= 0 && phase_step < 0) x->x_phase += 1.f;
-		while (x->x_phase > 1.f) x->x_phase -= 1.f;
-		*out++ = value;
 		x->x_phase += phase_step;
+		if (x->x_phase > 0.5f)
+		{
+			x->x_phase -= 1.f;
+			bang = 0.f;
+		}
+		else if (x->x_phase < -0.5f)
+		{
+			x->x_phase += 1.f;
+			bang = 0.f;
+		}
+		else
+		{
+			bang = (x->x_phase * x->x_last <= 0) ? 1.f : 0.f;
+		}
+		*out++ = bang;
+		x->x_last = x->x_phase;
     }
     return (w+5);
 }
@@ -58,6 +73,7 @@ static t_int *impulse_tilde_perform(t_int *w)
 static void impulse_tilde_ft1(t_impulse_tilde *x, t_float f)
 {
 	x->x_phase = f;
+	x->x_last = 0.f;
 }
 
 static void impulse_tilde_dsp(t_impulse_tilde *x, t_signal **sp)
